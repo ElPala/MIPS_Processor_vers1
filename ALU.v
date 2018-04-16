@@ -27,6 +27,9 @@ module ALU
 	output reg [31:0]ALUResult
 );
 
+
+
+
 localparam AND = 4'b0000;
 localparam OR =  4'b0001;
 localparam NOR = 4'b0010;
@@ -35,7 +38,9 @@ localparam SUB = 4'b0100;
 localparam SLL = 4'b1000;
 localparam SRL = 4'b1001;
 localparam BEQ = 4'b1100;
-
+localparam LUI = 4'b1110;
+localparam MEM = 4'b1010;
+localparam JR  = 4'b1011;
    always @ (A or B or ALUOperation or Shamt)
      begin
 		case (ALUOperation)
@@ -55,6 +60,12 @@ localparam BEQ = 4'b1100;
 			ALUResult= B >> Shamt;
 		  BEQ:
 			ALUResult=A - B;
+		  LUI:
+			ALUResult={B[15:0],16'b0};
+		  MEM:
+			ALUResult=(A + B - 268500992) / 4;
+		  JR:
+			ALUResult = A;
 		default:
 			ALUResult= 0;
 		endcase // case(control)
