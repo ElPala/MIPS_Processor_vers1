@@ -27,7 +27,7 @@
 
 module MIPS_Processor
 #(
-	parameter MEMORY_DEPTH = 32
+	parameter MEMORY_DEPTH = 54
 )
 
 (
@@ -64,6 +64,7 @@ wire Jal_wire;
 wire [2:0] ALUOp_wire;
 wire [3:0] ALUOperation_wire;
 wire [4:0] WriteRegister_wire;
+wire [4:0] MUX_ForRTypeAndIType_wire;
 wire [31:0] MUX_PC_wire; 
 wire [31:0]	PC_wire;
 wire [31:0] Instruction_wire;
@@ -144,7 +145,6 @@ PC_Puls_8
 (
 	.Data0(PC_wire),
 	.Data1(8),
-	
 	.Result(PC_8_wire)
 );
 
@@ -162,8 +162,7 @@ MUX_ForRTypeAndIType
 	.Selector(RegDst_wire),
 	.MUX_Data0(Instruction_wire[20:16]),
 	.MUX_Data1(Instruction_wire[15:11]),
-	
-	.MUX_Output(WriteRegister_wire)
+	.MUX_Output(MUX_ForRTypeAndIType_wire)
 
 );
 
@@ -171,13 +170,25 @@ Multiplexer2to1
 #(
 	.NBits(5)
 )
-MUX_ForWriteReg
+MUX_ForWriteRegister
+(
+	.Selector(Jal_wire),
+	.MUX_Data0(MUX_ForRTypeAndIType_wire),
+	.MUX_Data1({5'b11111}),
+	.MUX_Output(WriteRegister_wire)
+);
+
+
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+MUX_ForWriteData
 (
 	.Selector(Jal_wire),
 	.MUX_Data0(MUX_WriteData_wire),
-	.MUX_Data1(PC_8_wire),
-	.MUX_Output(MUX_RegisterFile_wire)
-
+	.MUX_Data1(PC_4_wire),
+	.MUX_Output(MUX_RegisterFile_wire)	
 );
 
 
@@ -324,6 +335,6 @@ MUX_WriteData
 
 assign ALUResultOut = ALUResult_wire;
 assign PCtoBranch_wire = (Zero_wire & BranchEQ_wire) | (~Zero_wire & BranchNE_wire);
-assign  PortOut = MUX_PC_wire;
+assign  PortOut = PC_wire;
 endmodule
 
